@@ -28,7 +28,7 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
     /* Product Routes */
-    Route::group(['namespace' => 'App\Http\Controllers','prefix' => 'product'], function (){
+    Route::group(['namespace' => 'App\Http\Controllers','prefix' => 'product', 'middleware' => 'auth:sanctum'], function (){
         Route::get('/', 'ProductController@index');
         Route::get('/{id}', 'ProductController@show');
         Route::post('/{id}', 'ProductController@update');
@@ -37,7 +37,7 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
     /*Supplier Routes*/
-    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'supplier'], function (){
+    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'supplier', 'middleware' => 'auth:sanctum'], function (){
         Route::get('/', 'SupplierController@index');
         Route::get('/{id}', 'SupplierController@show');
         Route::post('/', 'SupplierController@store');
@@ -47,7 +47,7 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
     /*Supplier Products Routes*/
-    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'supplier_product'], function (){
+    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'supplier_product', 'middleware' => 'auth:sanctum'], function (){
         Route::get('/', 'SupplierProductController@index');
         Route::get('/{id}', 'SupplierProductController@show');
         Route::post('/', 'SupplierProductController@store');
@@ -56,7 +56,7 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
     /*Order Routes*/
-    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'order'], function (){
+    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'order', 'middleware' => 'auth:sanctum'], function (){
         Route::get('/', 'OrderController@index');
         Route::get('/{id}', 'OrderController@show');
         Route::post('/', 'OrderController@store');
@@ -66,7 +66,7 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
     /*Order Details  Routes*/
-    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'order_detail'], function (){
+    Route::group(['namespace' => 'App\Http\Controllers', 'prefix' => 'order_detail', 'middleware' => 'auth:sanctum'], function (){
         Route::get('/', 'OrderDetailController@index');
         Route::get('/{id}', 'OrderDetailController@show');
         Route::post('/', 'OrderDetailController@store');
