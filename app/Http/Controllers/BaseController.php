@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ApiResponser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Http\Response;
 
 class BaseController extends Controller
 {
+    use ApiResponser;
+
     protected $model;
     protected $resource;
 
@@ -29,9 +32,7 @@ class BaseController extends Controller
         try{
             return $this->response($this->model::all());
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+            return $this->error($exception->getMessage());
         }
     }
 
@@ -49,9 +50,8 @@ class BaseController extends Controller
             $model->save();
             return $this->response($model);
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+            return $this->error($exception->getMessage());
+
         }
     }
 
@@ -65,9 +65,8 @@ class BaseController extends Controller
         try{
             return $this->response( $this->model::find($id));
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+            return $this->error($exception->getMessage());
+
         }
     }
 
@@ -85,9 +84,7 @@ class BaseController extends Controller
             $model->save();
             return $this->response($model);
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+            return $this->error($exception->getMessage());
         }
     }
 
@@ -102,13 +99,9 @@ class BaseController extends Controller
             $model = $this->model::find($id);
             $model->delete();
 
-            return response()->json([
-                'message' => $this->model.' deleted'
-            ], 200);
+            return $this->success([], $this->model.' deleted');
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return $this->error($exception->getMessage());
         }
     }
 
@@ -123,29 +116,26 @@ class BaseController extends Controller
             $model = $this->model::find($id);
             $model->forceDelete();
 
-            return response()->json([
-                'message' => $this->model.' deleted'
-            ], 200);
+            return $this->success([], $this->model.' deleted');
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+            return $this->error($exception->getMessage());
         }
     }
 
     /**
      * Return responses from resources
      * @param $result
-     * @return Collection|Model|AnonymousResourceCollection|JsonResource
      */
     public function response($result)
     {
         if ($result instanceof Model){
-            return $this->resource ? new $this->resource($result) : new JsonResource($result);
+            $data = $this->resource ? new $this->resource($result) : new JsonResource($result);
+            return $this->success($data);
         }
 
         if ($result instanceof Collection){
-            return $this->resource ? $this->resource::collection($result) : JsonResource::collection($result);
+            $data = $this->resource ? $this->resource::collection($result) : JsonResource::collection($result);
+            return $this->success($data);
         }
     }
 }

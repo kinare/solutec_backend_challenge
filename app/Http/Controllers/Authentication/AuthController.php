@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authentication;
 
+use App\Http\Controllers\Concerns\ApiResponser;
 use App\Http\Controllers\Controller;
 use App\Models\PasswordReset;
 use App\Models\User;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    use ApiResponser;
+
     public function register(Request $request)
     {
         try {
@@ -30,13 +33,9 @@ class AuthController extends Controller
             $user->password = Hash::make( $request->password);
             $user->save();
 
-            return response()->json([
-                'message' => "Registration Success",
-            ], 200);
+            return $this->success($user, "Registration Success");
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return  $this->error( $exception->getMessage());
         }
     }
 
@@ -51,20 +50,17 @@ class AuthController extends Controller
             $user = User::whereEmail($request->email)->first();
 
             if (! $user || ! Hash::check($request->password, $user->password)){
-                return response()->json([
-                    'message' => 'The provided credentials are not correct'
-                ], 500);
+                return $this->error('The provided credentials are not correct');
             }
 
-            return response()->json([
+            return $this->success([
                 'user' => $user->refresh(),
                 'token' => $user->createToken("crimson")->plainTextToken
-            ], 200);
+            ]);
+
 
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return $this->error($exception->getMessage());
         }
     }
 
@@ -75,13 +71,9 @@ class AuthController extends Controller
             $request->user()->currentAccessToken()->delete();
 
             /* clear application cache */
-            return response()->json([
-                'message' => 'logout success',
-            ], 200);
+            return $this->success(null, 'logout success');
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return $this->error($exception->getMessage());
         }
     }
 
@@ -108,13 +100,9 @@ class AuthController extends Controller
 
             $user->notify(new UserPasswordResetNotice($reset));
 
-            return response()->json([
-                'message' => 'Password reset link has been sent to your email'
-            ], 200);
+            return $this->success('', 'Password reset link has been sent to your email');
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+           return $this->error($exception->getMessage());
         }
     }
 
@@ -130,9 +118,7 @@ class AuthController extends Controller
             $reset = PasswordReset::whereToken($request->token)->first();
 
             if (!$reset)
-                return response()->json([
-                    'message' => 'Invalid password reset token.'
-                ], 404);
+                return $this->error('Invalid password reset token.', 404);
 
             $user = User::whereEmail($reset->email)->first();
             $user->password = Hash::make($request->password);
@@ -141,24 +127,18 @@ class AuthController extends Controller
             $reset->forceDelete();
             $user->notify(new UserPasswordResetSuccessNotice());
 
-            return response()->json([
-                'message' => 'Password Set Successfully.'
-            ], 404);
+            return $this->error('Password Set Successfully.', 404);
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return $this->error($exception->getMessage());
         }
     }
 
     public function user(Request $request)
     {
         try {
-            return new JsonResource($request->user());
+            return $this->success(new JsonResource($request->user()));
         }catch (\Exception $exception){
-            return response()->json([
-                'message' => $exception->getMessage()
-            ], 500);
+            return $this->error($exception->getMessage());
         }
     }
 }
